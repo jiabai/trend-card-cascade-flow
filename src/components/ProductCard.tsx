@@ -5,6 +5,8 @@ import PriceTag from './PriceTag';
 import Counter from './Counter';
 import ProductChip from './ProductChip';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useOrientation } from '@/hooks/use-orientation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProductCardProps {
   id: string;
@@ -33,6 +35,11 @@ const ProductCard = ({
   const [touchStartTime, setTouchStartTime] = useState(0);
   const [touchStartX, setTouchStartX] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const orientation = useOrientation();
+  const isMobile = useIsMobile();
+  
+  // Use horizontal layout on desktop or in landscape mode on mobile
+  const useHorizontalLayout = !isMobile || orientation === 'landscape';
   
   // Unit price calculation
   const unitPrice = currentPrice / count;
@@ -87,65 +94,72 @@ const ProductCard = ({
 
   return (
     <div 
-      className="flex flex-col bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 relative"
+      className={`bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 relative ${useHorizontalLayout ? 'flex' : 'flex flex-col'}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* Image container with hover scale effect */}
-      <div className="group cursor-pointer">
+      <div className={`group cursor-pointer ${useHorizontalLayout ? 'w-1/3' : 'w-full'}`}>
         <div className="transform transition-transform duration-300 group-hover:scale-[1.02]">
           <ProductImage src={imageSrc} alt={name} />
         </div>
+      </div>
+
+      {/* Price tag - repositioned for horizontal layout */}
+      <div className={`${useHorizontalLayout ? 'absolute bottom-2 left-2 z-10' : ''}`}>
         <PriceTag originalPrice={originalPrice} currentPrice={currentPrice} />
       </div>
       
-      {/* Product name */}
-      <div className="p-3 pb-2">
-        <h3 className="font-medium text-gray-800 leading-tight">{name}</h3>
-      </div>
-      
-      {/* Operations area */}
-      <div className="flex items-center justify-between px-3 py-2">
-        <Counter value={count} onChange={setCount} />
-        <div className="text-sm text-gray-600">
-          <span className="font-medium">单次均价: </span>
-          <span className="text-price">{formattedUnitPrice}</span>
+      {/* Product details and operation area */}
+      <div className={`flex flex-col ${useHorizontalLayout ? 'w-2/3 p-3' : 'w-full'}`}>
+        {/* Product name */}
+        <div className={`${useHorizontalLayout ? 'mb-2' : 'p-3 pb-2'}`}>
+          <h3 className="font-medium text-gray-800 leading-tight">{name}</h3>
         </div>
-      </div>
-      
-      {/* Tags section */}
-      {hasTags && (
-        <div className="px-3 pb-3">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-500 font-medium">标签</span>
-            <button
-              onClick={() => setAreTagsExpanded(!areTagsExpanded)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {areTagsExpanded ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </button>
+        
+        {/* Operations area */}
+        <div className={`flex items-center justify-between ${useHorizontalLayout ? 'mb-2' : 'px-3 py-2'}`}>
+          <Counter value={count} onChange={setCount} />
+          <div className="text-sm text-gray-600">
+            <span className="font-medium">单次均价: </span>
+            <span className="text-price">{formattedUnitPrice}</span>
           </div>
-          
-          {areTagsExpanded && (
-            <div className="flex flex-wrap gap-1 animate-slide-up mt-1">
-              {tags.occasions.map((tag, index) => (
-                <ProductChip key={`occasion-${index}`} label={tag} variant="occasion" />
-              ))}
-              {tags.seasons.map((tag, index) => (
-                <ProductChip key={`season-${index}`} label={tag} variant="season" />
-              ))}
-              {tags.styles.map((tag, index) => (
-                <ProductChip key={`style-${index}`} label={tag} variant="style" />
-              ))}
-            </div>
-          )}
         </div>
-      )}
+        
+        {/* Tags section */}
+        {hasTags && (
+          <div className={useHorizontalLayout ? 'mt-auto' : 'px-3 pb-3'}>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-gray-500 font-medium">标签</span>
+              <button
+                onClick={() => setAreTagsExpanded(!areTagsExpanded)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {areTagsExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+            
+            {areTagsExpanded && (
+              <div className="flex flex-wrap gap-1 animate-slide-up mt-1">
+                {tags.occasions.map((tag, index) => (
+                  <ProductChip key={`occasion-${index}`} label={tag} variant="occasion" />
+                ))}
+                {tags.seasons.map((tag, index) => (
+                  <ProductChip key={`season-${index}`} label={tag} variant="season" />
+                ))}
+                {tags.styles.map((tag, index) => (
+                  <ProductChip key={`style-${index}`} label={tag} variant="style" />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       
       {/* Long-press quick menu */}
       {isLongPressed && (

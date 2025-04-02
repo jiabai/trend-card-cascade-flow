@@ -28,7 +28,7 @@ const ProductImage = ({ src, alt }: ProductImageProps) => {
   return (
     <div 
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="product-image-container group"
+      className="product-image-container w-3/4 mx-auto"
     >
       {imageSrc && (
         <img

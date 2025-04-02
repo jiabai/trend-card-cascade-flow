@@ -39,7 +39,7 @@ const ProductImage = ({ src, alt }: ProductImageProps) => {
         />
       )}
       {(!isLoaded || !imageSrc) && (
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse-light" />
+        <div className="absolute inset-x-0 inset-y-0 m-auto w-3/4 h-3/4 bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse-light rounded-lg" />
       )}
     </div>
   );
